@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gym Management System - Project Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:#111;line-height:1.7;padding:40px 60px;max-width:900px;margin:auto}
+@media print{body{padding:20px 40px;font-size:13px}}
+h1{font-size:28px;border-bottom:3px solid #4F46E5;padding-bottom:10px;margin-bottom:5px}
+h2{font-size:20px;color:#4F46E5;margin:30px 0 12px;border-left:4px solid #4F46E5;padding-left:12px}
+h3{font-size:16px;margin:18px 0 8px;color:#333}
+p,li{font-size:14px;margin-bottom:6px}
+ul{padding-left:20px}
+li{margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left}
+th{background:#4F46E5;color:#fff;font-size:12px;text-transform:uppercase}
+tr:nth-child(even){background:#f9f9f9}
+.cover{text-align:center;padding:80px 0 60px;page-break-after:always}
+.cover h1{font-size:36px;border:none;color:#4F46E5}
+.cover .subtitle{font-size:18px;color:#555;margin:10px 0 30px}
+.cover .meta{font-size:14px;color:#777;margin:5px 0}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;margin:2px}
+.badge-green{background:#DCFCE7;color:#16A34A}
+.badge-blue{background:#EEF2FF;color:#4F46E5}
+.badge-orange{background:#FEF3C7;color:#D97706}
+code{background:#f0f0f0;padding:2px 6px;border-radius:3px;font-size:13px}
+.section{page-break-inside:avoid}
+.footer{text-align:center;margin-top:40px;padding-top:15px;border-top:2px solid #eee;font-size:12px;color:#999}
+</style>
+</head>
+<body>
+
+<div class="cover">
+<h1>GYM MANAGEMENT SYSTEM</h1>
+<div class="subtitle">Full-Stack MERN Application — Project Report</div>
+<p style="font-size:16px;margin:20px 0"><strong>Project Name:</strong> GymOS</p>
+<div class="meta"><strong>Technology:</strong> MongoDB · Express.js · React.js · Node.js</div>
+<div class="meta"><strong>Date:</strong> May 2026</div>
+<div class="meta"><strong>Author:</strong> Biswa Prakash Nayak</div>
+</div>
+
+<h2>1. Introduction</h2>
+<p>The <strong>Gym Management System (GymOS)</strong> is a full-stack web application built using the MERN stack (MongoDB, Express.js, React.js, Node.js). It provides a comprehensive platform for gym owners to manage members, track attendance, process payments, and assign personalized workout and diet plans. Athletes get a dedicated portal to view their schedules, log attendance, and monitor their fitness journey.</p>
+
+<h3>1.1 Objectives</h3>
+<ul>
+<li>Provide role-based access for Admin and Athlete users</li>
+<li>Enable CRUD operations for member management</li>
+<li>Implement workout and diet plan assignment with weekly scheduling</li>
+<li>Track attendance with calendar-based visualization</li>
+<li>Simulate payment processing with a mock payment gateway</li>
+<li>Deliver a modern, responsive user interface</li>
+</ul>
+
+<h3>1.2 Scope</h3>
+<p>The system covers member registration, membership management (basic/standard/premium tiers), workout scheduling, diet planning with macro tracking, attendance logging with absence reasons, and simulated payment processing with transaction history.</p>
+
+<h2>2. System Architecture</h2>
+<h3>2.1 Architecture Overview</h3>
+<p>The application follows a <strong>client-server architecture</strong> with a React SPA frontend communicating with a RESTful Express.js backend API, backed by a MongoDB database.</p>
+<table>
+<tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr>
+<tr><td>Frontend</td><td>React 18, React Router v6, Axios</td><td>User interface &amp; client-side routing</td></tr>
+<tr><td>Backend</td><td>Node.js, Express 4.18</td><td>REST API, business logic</td></tr>
+<tr><td>Database</td><td>MongoDB (Mongoose ODM)</td><td>Data persistence</td></tr>
+<tr><td>Auth</td><td>JWT (jsonwebtoken), bcryptjs</td><td>Authentication &amp; password hashing</td></tr>
+</table>
+
+<h3>2.2 Project Structure</h3>
+<table>
+<tr><th>Directory</th><th>Contents</th></tr>
+<tr><td><code>backend/server.js</code></td><td>Express app setup, middleware, MongoDB connection</td></tr>
+<tr><td><code>backend/models/</code></td><td>6 Mongoose schemas: User, Member, Attendance, Payment, WorkoutSchedule, DietSchedule</td></tr>
+<tr><td><code>backend/routes/</code></td><td>6 route modules: auth, members, attendance, payments, workout, diet</td></tr>
+<tr><td><code>backend/middleware/</code></td><td>JWT auth middleware with role-based guards (protect, adminOnly, athleteOnly)</td></tr>
+<tr><td><code>frontend/src/pages/</code></td><td>Login, Register, 7 Admin pages, 5 Athlete pages</td></tr>
+<tr><td><code>frontend/src/components/</code></td><td>Sidebar, PaymentModal, Toast notification system</td></tr>
+<tr><td><code>frontend/src/context/</code></td><td>AuthContext for global authentication state</td></tr>
+<tr><td><code>frontend/src/services/</code></td><td>Axios API client with JWT interceptor</td></tr>
+</table>
+
+<h2>3. Database Design</h2>
+<h3>3.1 MongoDB Collections</h3>
+
+<p><strong>User Schema</strong> — Stores authentication credentials and roles.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>name</td><td>String</td><td>Required, trimmed</td></tr>
+<tr><td>email</td><td>String</td><td>Required, unique, lowercase</td></tr>
+<tr><td>password</td><td>String</td><td>Min 6 chars, bcrypt hashed via pre-save hook</td></tr>
+<tr><td>role</td><td>String</td><td>Enum: admin, athlete</td></tr>
+</table>
+
+<p><strong>Member Schema</strong> — Extended profile linked to User via ObjectId reference.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>userId</td><td>ObjectId (ref: User)</td><td>Required, unique</td></tr>
+<tr><td>phone, address</td><td>String</td><td>Contact details</td></tr>
+<tr><td>membershipType</td><td>String</td><td>Enum: basic, standard, premium</td></tr>
+<tr><td>enrollmentDate / expiryDate</td><td>Date</td><td>Membership period</td></tr>
+<tr><td>status</td><td>String</td><td>Auto-calculated: active, expired, pending</td></tr>
+<tr><td>emergencyContact</td><td>Object</td><td>name, phone, relation</td></tr>
+<tr><td>goals, healthNotes</td><td>String</td><td>Fitness goals and medical notes</td></tr>
+</table>
+
+<p><strong>WorkoutSchedule Schema</strong> — Weekly workout plan with nested exercises per day.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>userId</td><td>ObjectId</td><td>Athlete reference</td></tr>
+<tr><td>week / year</td><td>Number</td><td>Week number (1–53) and year</td></tr>
+<tr><td>days[]</td><td>Array</td><td>7 day objects with dayName, focus, isRestDay, exercises[]</td></tr>
+<tr><td>exercises[]</td><td>Sub-doc</td><td>name, sets, reps, rest, notes</td></tr>
+</table>
+
+<p><strong>DietSchedule Schema</strong> — Weekly diet plan with meals and macronutrient tracking.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>days[]</td><td>Array</td><td>7 day objects with targetCalories, waterIntake, meals[]</td></tr>
+<tr><td>meals[]</td><td>Sub-doc</td><td>type (breakfast/lunch/dinner/snack/pre-workout/post-workout), time, foods[]</td></tr>
+<tr><td>foods[]</td><td>Sub-doc</td><td>name, quantity, calories, protein, carbs, fat</td></tr>
+</table>
+
+<p><strong>Attendance Schema</strong> — Daily attendance record with unique index on userId + date.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>status</td><td>String</td><td>Enum: present, absent, late</td></tr>
+<tr><td>reason</td><td>String</td><td>Required for absent/late</td></tr>
+<tr><td>checkInTime / checkOutTime</td><td>String</td><td>Time records</td></tr>
+</table>
+
+<p><strong>Payment Schema</strong> — Transaction records with mock payment gateway.</p>
+<table>
+<tr><th>Field</th><th>Type</th><th>Details</th></tr>
+<tr><td>amount</td><td>Number</td><td>Calculated: plan price × duration</td></tr>
+<tr><td>plan</td><td>String</td><td>basic (₹999), standard (₹1999), premium (₹3499)</td></tr>
+<tr><td>method</td><td>String</td><td>card, upi, cash</td></tr>
+<tr><td>status</td><td>String</td><td>success, failed, pending (90% mock success rate)</td></tr>
+<tr><td>transactionId</td><td>String</td><td>Auto-generated unique ID</td></tr>
+</table>
+
+<h2>4. API Design</h2>
+<h3>4.1 REST API Endpoints</h3>
+
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Access</th><th>Description</th></tr>
+<tr><td>POST</td><td>/api/auth/register</td><td>Public</td><td>Register new user</td></tr>
+<tr><td>POST</td><td>/api/auth/login</td><td>Public</td><td>Login &amp; get JWT token</td></tr>
+<tr><td>GET</td><td>/api/auth/me</td><td>Auth</td><td>Get current user profile</td></tr>
+<tr><td>GET</td><td>/api/members</td><td>Admin</td><td>List all members with search/filter</td></tr>
+<tr><td>GET</td><td>/api/members/stats</td><td>Admin</td><td>Dashboard statistics</td></tr>
+<tr><td>GET</td><td>/api/members/me</td><td>Auth</td><td>Own member profile</td></tr>
+<tr><td>POST</td><td>/api/members</td><td>Admin</td><td>Add new member (creates User + Member)</td></tr>
+<tr><td>PUT</td><td>/api/members/:id</td><td>Admin</td><td>Update member details</td></tr>
+<tr><td>DELETE</td><td>/api/members/:id</td><td>Admin</td><td>Delete member and associated user</td></tr>
+<tr><td>GET</td><td>/api/workout/:userId</td><td>Auth</td><td>Get workout schedule by week/year</td></tr>
+<tr><td>POST</td><td>/api/workout</td><td>Admin</td><td>Create or update workout schedule</td></tr>
+<tr><td>GET</td><td>/api/diet/:userId</td><td>Auth</td><td>Get diet schedule by week/year</td></tr>
+<tr><td>POST</td><td>/api/diet</td><td>Admin</td><td>Create or update diet schedule</td></tr>
+<tr><td>POST</td><td>/api/attendance</td><td>Auth</td><td>Log attendance (self)</td></tr>
+<tr><td>GET</td><td>/api/attendance/me</td><td>Auth</td><td>Own attendance history</td></tr>
+<tr><td>GET</td><td>/api/attendance/summary</td><td>Admin</td><td>Attendance stats with aggregation</td></tr>
+<tr><td>POST</td><td>/api/payments/mock-charge</td><td>Admin</td><td>Process mock payment</td></tr>
+<tr><td>GET</td><td>/api/payments/:memberId</td><td>Admin</td><td>Payment history for member</td></tr>
+<tr><td>GET</td><td>/api/payments/revenue/summary</td><td>Admin</td><td>Revenue analytics</td></tr>
+</table>
+
+<h2>5. Frontend Design</h2>
+<h3>5.1 Authentication &amp; Routing</h3>
+<p>The app uses React Context API (<code>AuthContext</code>) for state management. JWT tokens are stored in localStorage and auto-attached via Axios interceptors. Protected routes enforce role-based access (admin/athlete) with automatic redirects.</p>
+
+<h3>5.2 Admin Module (7 Pages)</h3>
+<table>
+<tr><th>Page</th><th>Features</th></tr>
+<tr><td>AdminDashboard</td><td>Stats cards (total/active/expired members, revenue), recent members list, attendance bar chart, quick actions</td></tr>
+<tr><td>MemberList</td><td>Searchable/filterable member table with status badges</td></tr>
+<tr><td>AddMember</td><td>Multi-field registration form with validation</td></tr>
+<tr><td>MemberDetail</td><td>Full member profile, payment history, membership renewal via PaymentModal</td></tr>
+<tr><td>AttendanceReport</td><td>Monthly attendance summary with aggregated stats and top absence reasons</td></tr>
+<tr><td>AssignWorkout</td><td>7-day workout planner with exercise builder (sets/reps/rest)</td></tr>
+<tr><td>AssignDiet</td><td>7-day diet planner with meal types and macronutrient inputs</td></tr>
+</table>
+
+<h3>5.3 Athlete Module (5 Pages)</h3>
+<table>
+<tr><th>Page</th><th>Features</th></tr>
+<tr><td>AthleteDashboard</td><td>Streak counter, present/absent stats, today's workout &amp; diet preview, membership countdown</td></tr>
+<tr><td>WorkoutSchedule</td><td>Weekly workout view with exercise cards per day</td></tr>
+<tr><td>DietSchedule</td><td>Weekly diet view with meal details and calorie tracking</td></tr>
+<tr><td>AttendanceLog</td><td>Calendar-based attendance view with status logging and reason input</td></tr>
+<tr><td>AthleteProfile</td><td>Personal profile information and membership status</td></tr>
+</table>
+
+<h3>5.4 Reusable Components</h3>
+<ul>
+<li><strong>Sidebar</strong> — Dynamic navigation based on user role (admin/athlete), user avatar with initials, sign-out</li>
+<li><strong>PaymentModal</strong> — Plan selection, duration picker, payment method tabs (Card/UPI/Cash), card UI mockup, transaction result display</li>
+<li><strong>Toast</strong> — Global notification system for success/error feedback</li>
+</ul>
+
+<h2>6. Security Implementation</h2>
+<ul>
+<li><strong>Password Hashing:</strong> bcryptjs with salt rounds of 10 via Mongoose pre-save hook</li>
+<li><strong>JWT Authentication:</strong> Tokens generated with 7-day expiry, verified on every protected route</li>
+<li><strong>Role-Based Access:</strong> Three middleware guards — <code>protect</code> (any auth user), <code>adminOnly</code>, <code>athleteOnly</code></li>
+<li><strong>Input Validation:</strong> express-validator on auth routes for email, password, and name validation</li>
+<li><strong>CORS:</strong> Restricted to <code>http://localhost:3000</code> with credentials support</li>
+<li><strong>Global Error Handler:</strong> Centralized Express error middleware returning structured JSON errors</li>
+<li><strong>Auto-logout:</strong> Axios response interceptor clears tokens and redirects on 401 responses</li>
+</ul>
+
+<h2>7. UI/UX Design</h2>
+<ul>
+<li><strong>Design System:</strong> CSS custom properties (variables) for consistent theming across 25+ tokens</li>
+<li><strong>Typography:</strong> Inter font family with Bebas Neue for display headings</li>
+<li><strong>Neo-brutalist Style:</strong> Bold 2px borders, solid box-shadows, high-contrast color palette</li>
+<li><strong>Components:</strong> Cards with hover lift effects, color-coded stat cards, status badges, calendar grid</li>
+<li><strong>Responsive:</strong> Media queries for mobile (sidebar hidden, single-column layouts below 768px)</li>
+<li><strong>Animations:</strong> CSS keyframe animations for spinner, fade-in, slide-up, and slide-in transitions</li>
+</ul>
+
+<h2>8. Dependencies</h2>
+<h3>8.1 Backend</h3>
+<table>
+<tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+<tr><td>express</td><td>^4.18.2</td><td>Web framework</td></tr>
+<tr><td>mongoose</td><td>^8.0.3</td><td>MongoDB ODM</td></tr>
+<tr><td>jsonwebtoken</td><td>^9.0.2</td><td>JWT generation &amp; verification</td></tr>
+<tr><td>bcryptjs</td><td>^2.4.3</td><td>Password hashing</td></tr>
+<tr><td>cors</td><td>^2.8.5</td><td>Cross-origin requests</td></tr>
+<tr><td>dotenv</td><td>^16.3.1</td><td>Environment variables</td></tr>
+<tr><td>express-validator</td><td>^7.0.1</td><td>Request validation</td></tr>
+<tr><td>nodemon</td><td>^3.0.2</td><td>Dev auto-restart</td></tr>
+</table>
+
+<h3>8.2 Frontend</h3>
+<table>
+<tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+<tr><td>react</td><td>^18.2.0</td><td>UI library</td></tr>
+<tr><td>react-dom</td><td>^18.2.0</td><td>DOM rendering</td></tr>
+<tr><td>react-router-dom</td><td>^6.20.1</td><td>Client-side routing</td></tr>
+<tr><td>axios</td><td>^1.6.2</td><td>HTTP client</td></tr>
+<tr><td>react-scripts</td><td>^5.0.1</td><td>Build tooling (CRA)</td></tr>
+</table>
+
+<h2>9. How to Run</h2>
+<h3>9.1 Prerequisites</h3>
+<ul>
+<li>Node.js v18+ and npm</li>
+<li>MongoDB running locally on port 27017</li>
+</ul>
+
+<h3>9.2 Setup Steps</h3>
+<ol>
+<li><strong>Backend:</strong> <code>cd backend &amp;&amp; npm install &amp;&amp; npm run seed &amp;&amp; npm start</code> (runs on port 5000)</li>
+<li><strong>Frontend:</strong> <code>cd frontend &amp;&amp; npm install &amp;&amp; npm start</code> (runs on port 3000)</li>
+</ol>
+
+<h3>9.3 Demo Credentials</h3>
+<table>
+<tr><th>Role</th><th>Email</th><th>Password</th></tr>
+<tr><td>Admin</td><td>admin@gym.com</td><td>Admin@123</td></tr>
+<tr><td>Athlete</td><td>jordan@gym.com</td><td>Gym@1234</td></tr>
+<tr><td>Athlete</td><td>maya@gym.com</td><td>Gym@1234</td></tr>
+<tr><td>Athlete</td><td>chris@gym.com</td><td>Gym@1234</td></tr>
+</table>
+
+<h2>10. Future Enhancements</h2>
+<ul>
+<li>Real payment gateway integration (Razorpay/Stripe)</li>
+<li>Push notifications for membership expiry reminders</li>
+<li>Progress tracking with body measurements and photos</li>
+<li>Trainer assignment and multi-trainer support</li>
+<li>Mobile app using React Native</li>
+<li>Report export (PDF/Excel) for admin analytics</li>
+<li>Email notifications for attendance and renewals</li>
+</ul>
+
+<h2>11. Conclusion</h2>
+<p>The GymOS Management System successfully demonstrates a production-grade full-stack MERN application with role-based authentication, comprehensive member management, personalized fitness scheduling, attendance tracking, and simulated payment processing. The modular architecture with separated concerns (models, routes, middleware, components, pages) ensures maintainability and scalability. The neo-brutalist UI design provides a modern, visually distinctive user experience.</p>
+
+<div class="footer">
+<p>Gym Management System (GymOS) — Project Report &copy; 2026 | Biswa Prakash Nayak</p>
+<p style="margin-top:5px"><em>To save as PDF: Open this file in a browser → Press Ctrl+P → Select "Save as PDF"</em></p>
+</div>
+
+</body>
+</html>
